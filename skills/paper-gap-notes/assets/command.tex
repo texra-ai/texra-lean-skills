@@ -1,0 +1,37 @@
+% Shared commands for the notes in docs/paper-gaps/.
+% Every note loads this file via \input{command}. Project-wide notation
+% belongs here, never in per-note redefinitions.
+
+% --- Project configuration: edit these three lines for your repository -----
+\newcommand{\projectIssueBase}{https://github.com/OWNER/REPO/issues/}
+\newcommand{\projectPrBase}{https://github.com/OWNER/REPO/pull/}
+\newcommand{\projectDocBase}{https://OWNER.github.io/REPO/docs/}
+% ---------------------------------------------------------------------------
+
+\newcommand{\Lean}{\textsc{Lean}}
+
+% A formal declaration name, upright sans, breakable at underscores.
+\ExplSyntaxOn
+\NewDocumentCommand{\leanid}{m}{
+  \ifmmode
+    \textsf{\detokenize{#1}}
+  \else
+    \group_begin:
+    \urlstyle{sf}
+    \tl_set:Nn \l_tmpa_tl {#1}
+    \tl_replace_all:Nnn \l_tmpa_tl {\_} {_}
+    \exp_args:NV \path \l_tmpa_tl
+    \group_end:
+  \fi
+}
+\ExplSyntaxOff
+
+% Traceability links; use in footnotes, not in the running prose.
+\newcommand{\ghissue}[1]{\href{\projectIssueBase#1}{GitHub issue \##1}}
+\newcommand{\ghpr}[1]{\href{\projectPrBase#1}{PR \##1}}
+\newcommand{\doclink}[1]{\href{\projectDocBase#1.html}{\path{#1}}}
+
+% Domain notation (norms, operators, Dirac kets, ...) for your project's
+% mathematics goes below, using \providecommand so a note-local refinement
+% stays possible.
+\providecommand{\tr}{\operatorname{tr}}

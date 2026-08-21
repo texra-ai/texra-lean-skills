@@ -2,7 +2,7 @@
 
 ## Note skeleton
 
-A note is a short standalone LaTeX article (shared preamble via a `command.tex` in the notes directory):
+A note is a short standalone LaTeX article. Start from `assets/template.tex`, which models the full form; the shared preamble is `assets/command.tex` (both `latexmk`-verified):
 
 ```latex
 \title{<Mathematical subject of the discrepancy>}

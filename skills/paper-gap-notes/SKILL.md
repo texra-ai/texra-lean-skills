@@ -28,4 +28,4 @@ Write a note under `docs/paper-gaps/` whenever the formal statement is not liter
 - The blueprint entry citing a source must point at a Lean statement with the source's hypothesis set; otherwise it loses its formalized status or the restriction is stated explicitly in the blueprint.
 - A note exists before the deviating code merges, not after.
 
-For the note skeleton, the marker grammar, and the naming registry pattern, see [references/note-conventions.md](references/note-conventions.md).
+For the note skeleton, the marker grammar, and the naming registry pattern, see [references/note-conventions.md](references/note-conventions.md). To adopt the protocol in a project, copy the three files in [assets/](assets/) into `docs/paper-gaps/`: `command.tex` (shared preamble; edit the project-configuration block), `template.tex` (a model note kept as a writing reference, never compiled), and `policy.tex` (the conventions, published alongside the notes).
