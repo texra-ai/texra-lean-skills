@@ -1,9 +1,18 @@
 {
   "name": "texra-lean-skills",
-  "description": "Agent skills for Lean 4 / Mathlib formalization — blueprint, proof assistant, search, simplifier",
-  "version": "0.1.0",
-  "author": { "name": "texra-ai" },
+  "description": "Agent skills for Lean 4 / Mathlib formalization \u2014 blueprint, proof assistant, search, simplifier",
+  "version": "0.2.0",
+  "author": {
+    "name": "texra-ai"
+  },
   "repository": "https://github.com/texra-ai/texra-lean-skills",
   "license": "MIT",
-  "keywords": ["lean", "lean4", "mathlib", "formalization", "math", "skills"]
+  "keywords": [
+    "lean",
+    "lean4",
+    "mathlib",
+    "formalization",
+    "math",
+    "skills"
+  ]
 }

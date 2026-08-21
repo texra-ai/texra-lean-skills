@@ -12,6 +12,13 @@ Agent skills for Lean 4 / Mathlib formalization. Distributed as a [Claude Code p
 | [`lean-search`](skills/lean-search/SKILL.md) | Find existing Lean 4 / Mathlib lemmas, APIs, imports, and formalization patterns before writing new code. |
 | [`lean-simplifier`](skills/lean-simplifier/SKILL.md) | Refactor Lean 4 code toward Mathlib-quality style without changing theorem statements or computational meaning. |
 
+## Convention documents
+
+`docs/` is the canonical home of the shared Lean-project convention
+documents (Mathlib style, naming, documentation, PR review, proof
+integrity, prose style). Consumer repositories keep thin pointers to these
+files instead of copies.
+
 ## Install
 
 ### Claude Code
