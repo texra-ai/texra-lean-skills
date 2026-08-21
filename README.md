@@ -7,6 +7,7 @@ Agent skills for Lean 4 / Mathlib formalization. Distributed as a [Claude Code p
 | Skill | Purpose |
 | --- | --- |
 | [`lean-blueprint`](skills/lean-blueprint/SKILL.md) | Author and maintain Lean blueprint documents that connect informal mathematics to Lean 4 declarations. |
+| [`paper-gap-notes`](skills/paper-gap-notes/SKILL.md) | Record deviations between a formalization and its cited sources as standalone, citable mathematical notes. |
 | [`lean-proof-assistant`](skills/lean-proof-assistant/SKILL.md) | Develop and debug Lean 4 proofs in project context — inspect goals, search for lemmas, iterate on tactic scripts. |
 | [`lean-search`](skills/lean-search/SKILL.md) | Find existing Lean 4 / Mathlib lemmas, APIs, imports, and formalization patterns before writing new code. |
 | [`lean-simplifier`](skills/lean-simplifier/SKILL.md) | Refactor Lean 4 code toward Mathlib-quality style without changing theorem statements or computational meaning. |
