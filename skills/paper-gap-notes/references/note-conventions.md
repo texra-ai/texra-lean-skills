@@ -8,10 +8,10 @@ A note is a short standalone LaTeX article. Start from `assets/template.tex`, wh
 \title{<Mathematical subject of the discrepancy>}
 \date{YYYY-MM-DD}
 ...
-\section{The assertion}        % the source's statement, cited precisely
-\section{The formal statement} % what the formalization actually proves
-\section{The discrepancy}      % the mathematical difference, and why it matters
-\section{Verdict}              % classification + elimination plan or closure
+\section{The assertion}          % the source's statement, cited precisely
+\section{The point at issue}     % where the argument and the formalization part ways
+\section{The corrected statement}% the statement that is actually justified
+\section{Conclusion}             % verdict + elimination plan or closure
 ```
 
 Cite sources by label or line range: `arXiv:1606.00608, eq:II_CF1`, `Wolf §6.2`, `CPSV16, Lemma Lem1`. Put issue links, PR links, declaration names, and file paths in footnotes.
@@ -32,7 +32,7 @@ reports the open/high-severity counts. CI can require the marker
 
 ## Naming
 
-`<key>_<topic>.tex`. Keys live in a registry (one dict or table per project) mapping key → source: `cpsv16 → arXiv:1606.00608`, `wolf → Wolf, Quantum Channels & Operations`. Reserve one key (e.g. `tnlean`) for internal theorem-surface audits. Enforce in CI: reject an unregistered key and any repository reference to a note file that does not exist. Never encode issue numbers, first names, or bare arXiv numbers as keys; never append `_v1` — the repository history is the version record.
+`<key>_<topic>.tex`. Keys live in a registry (one dict or table per project) mapping key → source: `cpsv16 → arXiv:1606.00608`, `wolf → Wolf, Quantum Channels & Operations`. Reserve one key for the project itself (e.g. `self`) for internal theorem-surface audits. Enforce in CI: reject an unregistered key and any repository reference to a note file that does not exist. Never encode issue numbers, first names, or bare arXiv numbers as keys; never append `_v1` — the repository history is the version record.
 
 ## Marker grammar (Lean docstrings)
 
