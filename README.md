@@ -25,7 +25,18 @@ Agent skills for Lean 4 / Mathlib formalization. Distributed as a [Claude Code p
 
 Update: `/plugin marketplace update texra-lean-skills`.
 
-### Codex and any other agent (model-agnostic)
+### Codex, Cursor, and any other agent
+
+Use the [skills CLI](https://github.com/vercel-labs/skills) — the ecosystem
+package manager for agent skills (70+ agents):
+
+```bash
+npx skills add texra-ai/texra-lean-skills            # all skills
+npx skills add texra-ai/texra-lean-skills --agent codex --agent cursor
+npx skills update                                     # update everything later
+```
+
+Without Node, the bundled fallback does the same by symlink:
 
 ```bash
 git clone https://github.com/texra-ai/texra-lean-skills.git ~/.local/share/texra-lean-skills
@@ -33,7 +44,7 @@ git clone https://github.com/texra-ai/texra-lean-skills.git ~/.local/share/texra
 ~/.local/share/texra-lean-skills/install.sh --dir DIR    # any SKILL.md-reading agent
 ```
 
-Restart the agent. Update everywhere at once: `git -C ~/.local/share/texra-lean-skills pull`.
+Update the fallback with `git -C ~/.local/share/texra-lean-skills pull`.
 
 ### Per-repository auto-install
 
