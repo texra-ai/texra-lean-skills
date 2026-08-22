@@ -1,7 +1,7 @@
 {
   "name": "texra-lean-skills",
   "description": "Agent skills for Lean 4 / Mathlib formalization \u2014 conventions, build cache, blueprint, paper-gap notes, proof assistant, search, simplifier",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "author": {
     "name": "texra-ai"
   },
