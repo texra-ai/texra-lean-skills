@@ -12,7 +12,8 @@ rather than duplicating the rules inline.
 > the *specific* theorems whose old proof depended on the deviating
 > hypotheses. The protocol — including the required `**Unfaithful:**` marker
 > on every such theorem and a paper-gap note documenting the deviation — is
-> in `CLAUDE.md` §"Paper-realignment mode". Reviewers should evaluate
+> in the `paper-gap-notes` skill's `references/paper-realignment.md`.
+> Reviewers should evaluate
 > paper-realignment PRs against the gap note and the planned follow-up, not
 > against the `sorry` count alone.
 
