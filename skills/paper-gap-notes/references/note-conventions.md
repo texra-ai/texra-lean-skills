@@ -21,7 +21,8 @@ Cite sources by label or line range: `arXiv:1606.00608, eq:II_CF1`, `Wolf §6.2`
 Directly after `\maketitle`, every note declares
 `\gapnote{<kind>}{<status>}` — kind from the classification vocabulary
 (`clarification`, `local-correction`, `scope-restriction`, `unfaithful`,
-`false-source`, `open-gap`), status `open`/`resolved`/`historical`.
+`false-source`, `open-gap`), status `open`/`wip`/`resolved`/`historical`
+(`wip` = elimination actively underway; still live debt).
 Severity derives from the kind (unfaithful, false-source, open-gap are
 high; scope-restriction and local-correction medium; clarification low) —
 never stated separately. Resolving a gap changes the status, not the kind;
