@@ -25,15 +25,33 @@ Agent skills for Lean 4 / Mathlib formalization. Distributed as a [Claude Code p
 
 Update: `/plugin marketplace update texra-lean-skills`.
 
-### Codex
+### Codex and any other agent (model-agnostic)
 
 ```bash
-git clone https://github.com/texra-ai/texra-lean-skills.git ~/.codex/texra-lean-skills
-mkdir -p ~/.codex/skills
-ln -sfn ~/.codex/texra-lean-skills/skills ~/.codex/skills/texra-lean-skills
+git clone https://github.com/texra-ai/texra-lean-skills.git ~/.local/share/texra-lean-skills
+~/.local/share/texra-lean-skills/install.sh              # Codex (~/.codex/skills)
+~/.local/share/texra-lean-skills/install.sh --dir DIR    # any SKILL.md-reading agent
 ```
 
-Restart Codex. Update: `cd ~/.codex/texra-lean-skills && git pull`.
+Restart the agent. Update everywhere at once: `git -C ~/.local/share/texra-lean-skills pull`.
+
+### Per-repository auto-install
+
+A consuming repository checks in `.claude/settings.json` so Claude Code
+sessions auto-install the plugin on folder trust:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "texra-lean-skills": {
+      "source": { "source": "github", "repo": "texra-ai/texra-lean-skills" }
+    }
+  },
+  "enabledPlugins": { "texra-lean-skills@texra-lean-skills": true }
+}
+```
+
+and points other agents at `install.sh` from its AGENTS.md.
 
 ### Any other agent
 
