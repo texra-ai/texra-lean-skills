@@ -13,6 +13,23 @@
 # updates every linked agent at once.
 set -euo pipefail
 
+usage() {
+  cat <<'EOF'
+Model-agnostic install of the texra-lean-skills bundle.
+
+Claude Code needs no script: a repository's .claude/settings.json declares
+the marketplace and plugin, and the session auto-installs on first trust.
+This script serves every other agent that reads SKILL.md directories:
+
+  ./install.sh                 # Codex: symlink into ~/.codex/skills
+  ./install.sh --dir DIR       # any agent: symlink into DIR
+  ./install.sh --copy --dir D  # copy instead of symlink (no live updates)
+
+Idempotent: re-running refreshes the link; `git pull` in this checkout
+updates every linked agent at once.
+EOF
+}
+
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 MODE="link"
 TARGET=""
@@ -21,7 +38,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --dir)  TARGET="$2"; shift 2 ;;
     --copy) MODE="copy"; shift ;;
-    -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
+    -h|--help) usage; exit 0 ;;
     *) echo "install.sh: unknown argument $1" >&2; exit 2 ;;
   esac
 done
