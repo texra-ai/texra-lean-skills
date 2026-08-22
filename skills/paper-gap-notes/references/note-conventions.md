@@ -51,3 +51,21 @@ All three forms reference the note by path.
 ## Publishing
 
 Compile the notes to PDF in CI and publish them with the project site: one generated index grouped by source key (titles parsed from `\title`), stable per-note URLs (`.../paper-gaps/<name>.pdf`), and a generated BibTeX file with one `@techreport` per note (key `gap:<name>`) so the notes are citable from the blueprint and from papers.
+
+## Citing a note
+
+Blueprint prose cites a note like any other source: `\cite{gap:<slug>}`, with the entry copied from the generated BibTeX file into the blueprint's bibliography:
+
+```bibtex
+@techreport{gap:<slug>,
+  author      = {The {<Project>} contributors},
+  title       = {<note title>},
+  institution = {<Project>},
+  type        = {Paper-gap note},
+  number      = {<slug>},
+  year        = {<YYYY>},
+  url         = {<site base>/paper-gaps/<slug>.pdf},
+}
+```
+
+The published URL lives only in the bibliography entry, never in prose. A cross-repository citation uses the same mechanism — the entry's `url` (and author/institution) name the repository that owns the note. Lean docstrings, code comments, and `%` comments keep the repository path form `docs/paper-gaps/<slug>.tex`. CI validates path-form references (a referenced note file must exist); validating the `\cite{gap:<slug>}` form is a package follow-up.
