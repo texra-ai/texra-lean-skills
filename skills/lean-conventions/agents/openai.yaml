@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Lean Conventions'
+  short_description: 'Canonical style, naming, review, integrity, and prose rules'
+  default_prompt: 'Use $lean-conventions to check this work against the shared convention documents.'
