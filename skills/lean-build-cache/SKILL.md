@@ -7,58 +7,34 @@ description: Keep Lean 4 / Mathlib builds fast on a local machine — fetch preb
 
 ## The two iron rules
 
-1. **Never build Mathlib from source.** In any fresh, cloned, or cache-cleared
-   worktree, run `lake exe cache get` *before* `lake build` or any local Lean
-   check. Skipping it can silently trigger an hours-long Mathlib rebuild. The
-   same applies after any Mathlib, toolchain, or dependency bump.
-2. **Keep the primary worktree hot.** The repository's main checkout holds the
-   authoritative warm `.lake`; fresh worktrees are seeded *from* it rather than
-   rebuilt. Never run a seed while the source worktree has a Lake command
-   running.
+1. **Never build Mathlib from source.** In any fresh, cloned, or
+   cache-cleared worktree — and after any Mathlib/toolchain/dependency bump —
+   run `lake exe cache get` *before* `lake build` or any local Lean check.
+   Skipping it can silently trigger an hours-long rebuild.
+2. **Keep the primary worktree hot, and seed from it.** The main checkout
+   holds the authoritative warm `.lake`; fresh worktrees are APFS-clone-seeded
+   from it, never rebuilt. Never seed while the source worktree is running a
+   Lake command.
 
-## Seeding a fresh worktree (macOS/APFS)
+## The tools (copy from [assets/](assets/) into the project's `scripts/`)
 
-```bash
-git worktree add -b agent/my-branch /private/tmp/proj-my-branch origin/main
-scripts/seed_lake_build.sh /private/tmp/proj-my-branch --dry-run   # preflight
-scripts/seed_lake_build.sh /private/tmp/proj-my-branch             # clone
-```
-
-The seed uses APFS copy-on-write cloning (`/bin/cp -c`): instant, disk-cheap,
-and the clones are independent writable files — no shared mutable state
-between worktrees. The script validates before touching anything: same
-repository, identical `lean-toolchain` / `lake-manifest.json` / `lakefile.toml`,
-clean dependency checkouts at the manifest revisions, prebuilt `Mathlib.olean`
-present in the source, and no pre-existing target `.lake`. The target is
-reserved and the completed clone is swapped in atomically, so a concurrent
-Lake process can never observe a partial cache.
-
-**Commit-match rule:** full project build artifacts are reused only when
-source and target are at the same commit. Across commits the seed carries only
-the validated dependency packages (including Mathlib) and leaves the project's
-own `.lake/build` absent — run `lake build` afterward so the project rebuilds
-against the seeded dependencies. This prevents stale `.olean` files whose
-declarations no longer match the target sources.
+- [`assets/seed_lake_build.sh`](assets/seed_lake_build.sh) — the seeder:
+  `seed_lake_build.sh TARGET_WORKTREE [SOURCE] [--dry-run]`. Validates
+  everything before touching anything and swaps the clone in atomically;
+  contract and failure modes in
+  [references/seeding-contract.md](references/seeding-contract.md).
+- [`assets/lake_build_hotspots.py`](assets/lake_build_hotspots.py) —
+  build-time triage: `lake build 2>&1 | tee log` then
+  `python3 lake_build_hotspots.py log` lists slow jobs and gates changed
+  modules (warn 25s, fail 50s; thresholds are flags).
+- Each ships with its test harness
+  ([`test_seed_lake_build.sh`](assets/test_seed_lake_build.sh),
+  [`test_lake_build_hotspots.py`](assets/test_lake_build_hotspots.py)) —
+  run them after copying.
 
 ## Verification that actually runs the linters
 
-- `lake build Project.Path.To.File` — linter-bearing check of one module,
-  applying the package `leanOptions` (including Mathlib's standard linter
-  set). Diagnostics appear only when the module is re-elaborated; an
-  unchanged, already-built module prints nothing.
-- `lake env lean Project/Path/To/File.lean` — fast elaboration only; it does
-  **not** apply the package options and is not a linter-bearing verification.
-  Only `lake build` reproduces what CI checks.
-
-## Diagnosing slow builds
-
-```bash
-lake build 2>&1 | tee /tmp/build.log
-python3 scripts/lake_build_hotspots.py /tmp/build.log   # jobs ≥ threshold
-```
-
-Compile-time regressions in changed modules are a reviewable defect, not
-noise; projects in this family gate on a per-module compile-time limit in CI.
-
-For the seed script's full validation contract and failure modes, see
-[references/seeding-contract.md](references/seeding-contract.md).
+`lake build Project.Path.To.File` applies the package `leanOptions`
+(including Mathlib's linter set) — but only when the module re-elaborates.
+`lake env lean` is fast elaboration only, applies no package options, and is
+not a linter-bearing check; only `lake build` reproduces CI.
