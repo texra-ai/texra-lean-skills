@@ -64,7 +64,7 @@ sessions auto-install the plugin on folder trust:
 
 and points other agents at `install.sh` from its AGENTS.md.
 
-### Any other agent
+### Manual per-skill install
 
 Clone and copy or symlink individual skill directories into your agent's skill location.
 

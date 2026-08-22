@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/lake-seed-lake-seed-test.XXXXXX")"
+TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/lake-seed-test.XXXXXX")"
 
 cleanup() {
   find "$TEST_ROOT" -depth -delete

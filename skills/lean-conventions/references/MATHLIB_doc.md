@@ -10,7 +10,7 @@ using the [Lean doc preview page](https://observablehq.com/@bryangingechen/githu
 ## Header comment
 
 Each mathlib file should start with:
-* a header comment with copyright information (see the [recommendations in our style guidelines](style.html#header-and-imports));
+* a header comment with copyright information (see the [recommendations in our style guidelines](MATHLIB_style.md#header-and-imports));
 * the list of imports (one on each line);
 * a module docstring containing general documentation, written
   [using Markdown and LaTeX](#latex-and-markdown).
@@ -216,10 +216,10 @@ def mapPrefix (f : Name → Option Name) (n : Name) : Name := Id.run do
 
 ## Theories documentation
 
-In addition to documentation living in Lean files, we have [theories documentation](../theories.html)
+In addition to documentation living in Lean files, we have [theories documentation](https://leanprover-community.github.io/theories.html)
 where we give overviews spanning several Lean files, and
 more mathematical explanations in cases where formalization requires slightly exotic points of view,
-see for instance the [topology documentation](../theories/topology.html).
+see for instance the [topology documentation](https://leanprover-community.github.io/theories/topology.html).
 
 ## Citing other works
 
@@ -273,7 +273,7 @@ Any common spelling (e.g. British, American or Australian English) is acceptable
 Pull requests should not be made that only change which of these spellings are used,
 but it is acceptable to change the spelling
 as part of a PR that substantially enhances the documentation.
-Contrast this with the rule for [declaration names](naming.html#spelling),
+Contrast this with the rule for [declaration names](MATHLIB_naming.md#spelling),
 which should use American English spelling.
 
 ## Examples

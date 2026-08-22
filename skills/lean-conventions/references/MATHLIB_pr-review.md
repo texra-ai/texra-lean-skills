@@ -61,9 +61,9 @@ This is just an outline; in later sections we investigate each question
 in more detail with examples.
 
 - [does it adhere to style?](#style)
-    + [code formatting](style.html)
-    + [naming conventions](naming.html)
-    + is the [PR title and description](commit.html) appropriately informative?
+    + [code formatting](MATHLIB_style.md)
+    + [naming conventions](MATHLIB_naming.md)
+    + is the [PR title and description](https://leanprover-community.github.io/contribute/commit.html) appropriately informative?
 - [is there useful documentation?](#documentation)
     + do the definitions have sufficiently informative docstrings?
     + are there cross references to related declarations?
@@ -465,7 +465,7 @@ burden if it won't ever be used.
 
 #### Are the declarations in the appropriate files?
 
-Consider the following example from [#5742](github.com/leanprover-community/mathlib4/pull/5742)
+Consider the following example from [#5742](https://github.com/leanprover-community/mathlib4/pull/5742)
 where the PR author was placing a norm structure on the `Unitization`. The author was
 creating a new file `Analysis.NormedSpace.Unitization` and at a certain point declared the
 instance:

@@ -167,9 +167,9 @@ SOURCE_REV="$(git -C "$SOURCE_ROOT" rev-parse HEAD)" ||
   die "cannot read source revision"
 TARGET_REV="$(git -C "$TARGET_ROOT" rev-parse HEAD)" ||
   die "cannot read target revision"
-REUSE_TNLEAN_BUILD="false"
+REUSE_PROJECT_BUILD="false"
 if test "$SOURCE_REV" = "$TARGET_REV"; then
-  REUSE_TNLEAN_BUILD="true"
+  REUSE_PROJECT_BUILD="true"
 fi
 test ! -L "$SOURCE_ROOT/.lake" || die "source .lake must not be a symlink"
 test -d "$SOURCE_ROOT/.lake/build" && test ! -L "$SOURCE_ROOT/.lake/build" ||
@@ -199,7 +199,7 @@ if test "$DRY_RUN" = "true"; then
   echo "seed-lake-build: dry-run passed"
   echo "seed-lake-build: source: $SOURCE_ROOT/.lake"
   echo "seed-lake-build: target: $TARGET_ROOT/.lake"
-  if test "$REUSE_TNLEAN_BUILD" = "true"; then
+  if test "$REUSE_PROJECT_BUILD" = "true"; then
     echo "seed-lake-build: project build artifacts will be reused"
   else
     echo "seed-lake-build: project build artifacts will be omitted (different revisions)"
@@ -220,7 +220,7 @@ RESERVATION_INODE="$(stat -f %i "$RESERVATION_DIR")"
 chmod 000 "$RESERVATION_DIR"
 STAGING_DIR="$(/usr/bin/mktemp -d "$TARGET_ROOT/.lake.seed.XXXXXX")"
 STAGING_INODE="$(stat -f %i "$STAGING_DIR")"
-if test "$REUSE_TNLEAN_BUILD" = "true"; then
+if test "$REUSE_PROJECT_BUILD" = "true"; then
   /bin/cp -cR "$SOURCE_ROOT/.lake/." "$STAGING_DIR"
 else
   /bin/cp -cR "$SOURCE_ROOT/.lake/packages" "$STAGING_DIR/packages"
@@ -260,7 +260,7 @@ chmod 700 "$STAGING_DIR"
 find "$STAGING_DIR" -depth -delete
 STAGING_DIR=""
 STAGING_INODE=""
-if test "$REUSE_TNLEAN_BUILD" = "true"; then
+if test "$REUSE_PROJECT_BUILD" = "true"; then
   echo "seed-lake-build: cloned $SOURCE_ROOT/.lake into $TARGET_ROOT/.lake"
 else
   echo "seed-lake-build: cloned dependency packages into $TARGET_ROOT/.lake"

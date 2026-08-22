@@ -1,6 +1,6 @@
 # Library Style Guidelines
 
-In addition to the [naming conventions](naming.html),
+In addition to the [naming conventions](MATHLIB_naming.md),
 files in the Lean library generally adhere to the following guidelines
 and conventions. Having a uniform style makes it easier to browse the
 library and read the contents, but these are meant to be guidelines
@@ -97,7 +97,7 @@ See [Thales600BC] for the original account on Xyzzyology.
 
 New bibliography entries should be added to `docs/references.bib`.
 
-See our [documentation requirements](doc.html) for more suggestions and examples.
+See our [documentation requirements](MATHLIB_doc.md) for more suggestions and examples.
 
 ### Structuring definitions and theorems
 
@@ -687,7 +687,7 @@ Documentation strings for declarations are delimited with `/-- -/`.
 When a documentation string for a declaration spans multiple lines, do not indent
 subsequent lines.
 
-See our [documentation requirements](doc.html) for more suggestions
+See our [documentation requirements](MATHLIB_doc.md) for more suggestions
 and examples.
 
 ### Expressions in error or trace messages
@@ -733,7 +733,7 @@ The `@[deprecated]` attribute requires the deprecation date, and an alias to the
 or a string to explain how transition away from the old definition when a new version is no longer
 being provided.
 
-The [`deprecate to`](/mathlib4_docs/Mathlib/Tactic/DeprecateTo.html) command and
+The [`deprecate to`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Tactic/DeprecateTo.html) command and
 `scripts/add_deprecations.sh` script can help generate alias definitions.
 
 Deprecations for declarations with the `to_additive` attribute should ensure the deprecation is

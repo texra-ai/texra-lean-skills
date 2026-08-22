@@ -74,7 +74,7 @@ theorem neZero_iff {R : Type _} [Zero R] {n : R} : NeZero n ↔ n ≠ 0 := sorry
 Declaration names use American English spelling. So e.g. we use
 `factorization`, `Localization` and `FiberBundle` and not
 `factorisation`, `Localisation` or `FibreBundle`.
-Contrast this with the rule for [documentation](doc.html#language),
+Contrast this with the rule for [documentation](MATHLIB_doc.md#language),
 which is allowed to use other common English spellings.
 
 ### Names of symbols
