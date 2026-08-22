@@ -4,10 +4,12 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/seed_lake_build.sh TARGET_WORKTREE [SOURCE_WORKTREE] [--dry-run]
+Usage: scripts/seed_lake_build.sh TARGET_WORKTREE [SOURCE_WORKTREE] [--dry-run] [--refresh]
 
 SOURCE_WORKTREE defaults to the repository's primary worktree. The target must
 belong to the same repository and must not already contain .lake.
+--refresh forces 'lake exe cache get' in the source even when prebuilt
+Mathlib artifacts are already present.
 EOF
 }
 
@@ -50,7 +52,7 @@ validate_packages() {
   local package_root
   local actual_rev
   local package_status
-  local metadata_link
+  local package_info
   local reported_root
   PACKAGE_LIST_FILE="$(mktemp "${TMPDIR:-/tmp}/lake-seed-packages.XXXXXX")" ||
     die "cannot create temporary package list"
@@ -79,17 +81,15 @@ PY
     test ! -e "$package_root/.git/objects/info/alternates" &&
       test ! -L "$package_root/.git/objects/info/alternates" ||
       die "Git package uses external object storage: $package_name"
-    metadata_link="$(
-      find "$package_root/.git" -type l -print -quit
-    )"
-    test -z "$metadata_link" ||
-      die "Git package metadata contains a symlink: $package_name"
-    reported_root="$(git -C "$package_root" rev-parse --show-toplevel 2>/dev/null)" ||
+    package_info="$(git -C "$package_root" rev-parse HEAD --show-toplevel 2>/dev/null)" ||
+      die "Git package is not a checkout: $package_name"
+    actual_rev="${package_info%%$'\n'*}"
+    reported_root="${package_info#*$'\n'}"
+    test -n "$actual_rev" && test -n "$reported_root" &&
+      test "$actual_rev" != "$reported_root" ||
       die "Git package is not a checkout: $package_name"
     test "$(canonical_dir "$reported_root")" = "$(canonical_dir "$package_root")" ||
       die "Git package worktree points outside its package root: $package_name"
-    actual_rev="$(git -C "$package_root" rev-parse HEAD 2>/dev/null)" ||
-      die "Git package is not a checkout: $package_name"
     test "$actual_rev" = "$expected_rev" ||
       die "Git package revision differs from lake-manifest.json: $package_name"
     if ! package_status="$(
@@ -139,6 +139,7 @@ PACKAGE_LIST_FILE=""
 RESERVATION_DIR=""
 RESERVATION_INODE=""
 DRY_RUN="false"
+REFRESH="false"
 
 test "$#" -ge 1 || {
   usage
@@ -148,15 +149,18 @@ test "$#" -ge 1 || {
 TARGET_PATH="$1"
 shift
 SOURCE_PATH="$PRIMARY_ROOT"
-if test "$#" -gt 0 && test "$1" != "--dry-run"; then
+if test "$#" -gt 0 && test "$1" != "--dry-run" && test "$1" != "--refresh"; then
   SOURCE_PATH="$1"
   shift
 fi
-if test "$#" -gt 0 && test "$1" = "--dry-run"; then
-  DRY_RUN="true"
+while test "$#" -gt 0; do
+  case "$1" in
+    --dry-run) DRY_RUN="true" ;;
+    --refresh) REFRESH="true" ;;
+    *) die "unknown argument: $1" ;;
+  esac
   shift
-fi
-test "$#" -eq 0 || die "unknown argument: $1"
+done
 
 validate_root "$SOURCE_PATH"
 validate_root "$TARGET_PATH"
@@ -176,14 +180,25 @@ test -d "$SOURCE_ROOT/.lake/build" && test ! -L "$SOURCE_ROOT/.lake/build" ||
   die "source has no regular .lake/build"
 test -d "$SOURCE_ROOT/.lake/packages" && test ! -L "$SOURCE_ROOT/.lake/packages" ||
   die "source has no regular .lake/packages"
-NESTED_CACHE_LINK="$(
+OFFENDING_LINK="$(
   find "$SOURCE_ROOT/.lake" -type l \
-    \( -name .lake -o -name build -o -name packages \
+    \( -path '*/.lake/packages/*/.git/*' \
+      -o -name .lake -o -name build -o -name packages \
       -o -path '*/.lake/build/*' -o -path '*/.lake/lakefile.*' \) \
     -print -quit
 )"
-test -z "$NESTED_CACHE_LINK" ||
-  die "source contains a symlinked Lake cache directory: $NESTED_CACHE_LINK"
+case "$OFFENDING_LINK" in
+  "")
+    ;;
+  "$SOURCE_ROOT/.lake/packages/"*"/.git/"*)
+    OFFENDING_PACKAGE="${OFFENDING_LINK#"$SOURCE_ROOT/.lake/packages/"}"
+    OFFENDING_PACKAGE="${OFFENDING_PACKAGE%%/*}"
+    die "Git package metadata contains a symlink: $OFFENDING_PACKAGE"
+    ;;
+  *)
+    die "source contains a symlinked Lake cache directory: $OFFENDING_LINK"
+    ;;
+esac
 test ! -e "$TARGET_ROOT/.lake" && test ! -L "$TARGET_ROOT/.lake" ||
   die "target already has .lake"
 
@@ -193,8 +208,10 @@ for input in lean-toolchain lake-manifest.json lakefile.toml; do
 done
 validate_packages "$SOURCE_ROOT"
 
+MATHLIB_OLEAN="$SOURCE_ROOT/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean"
+
 if test "$DRY_RUN" = "true"; then
-  test -f "$SOURCE_ROOT/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean" ||
+  test -f "$MATHLIB_OLEAN" ||
     die "source lacks prebuilt Mathlib artifacts"
   echo "seed-lake-build: dry-run passed"
   echo "seed-lake-build: source: $SOURCE_ROOT/.lake"
@@ -207,11 +224,13 @@ if test "$DRY_RUN" = "true"; then
   exit 0
 fi
 
-(
-  cd "$SOURCE_ROOT"
-  lake exe cache get
-) || die "failed to fetch current prebuilt Mathlib artifacts"
-test -f "$SOURCE_ROOT/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean" ||
+if test "$REFRESH" = "true" || test ! -f "$MATHLIB_OLEAN"; then
+  (
+    cd "$SOURCE_ROOT"
+    lake exe cache get
+  ) || die "failed to fetch current prebuilt Mathlib artifacts"
+fi
+test -f "$MATHLIB_OLEAN" ||
   die "source lacks prebuilt Mathlib artifacts after 'lake exe cache get'"
 
 RESERVATION_DIR="$TARGET_ROOT/.lake"

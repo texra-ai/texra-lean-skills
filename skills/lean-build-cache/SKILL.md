@@ -19,7 +19,7 @@ description: Keep Lean 4 / Mathlib builds fast on a local machine — fetch preb
 ## The tools (copy from [assets/](assets/) into the project's `scripts/`)
 
 - [`assets/seed_lake_build.sh`](assets/seed_lake_build.sh) — the seeder:
-  `seed_lake_build.sh TARGET_WORKTREE [SOURCE] [--dry-run]`. Validates
+  `seed_lake_build.sh TARGET_WORKTREE [SOURCE] [--dry-run] [--refresh]`. Validates
   everything before touching anything and swaps the clone in atomically;
   contract and failure modes in
   [references/seeding-contract.md](references/seeding-contract.md).

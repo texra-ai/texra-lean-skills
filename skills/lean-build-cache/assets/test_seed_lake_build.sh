@@ -212,8 +212,23 @@ git --git-dir="$REPO/.lake/packages/mathlib/.git" \
 )
 "$REPO/scripts/seed_lake_build.sh" "$TARGET" --dry-run >/dev/null
 test ! -e "$LAKE_CALL_LOG"
-PATH="$TEST_ROOT/bin:$PATH" "$REPO/scripts/seed_lake_build.sh" "$TARGET" >/dev/null
+
+mv "$REPO/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean" \
+  "$REPO/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean.missing"
+if PATH="$TEST_ROOT/bin:$PATH" \
+  "$REPO/scripts/seed_lake_build.sh" "$TARGET" 2>"$TEST_ROOT/error.log"; then
+  echo "missing prebuilt Mathlib cache unexpectedly seeded" >&2
+  exit 1
+fi
+/usr/bin/grep -q "source lacks prebuilt Mathlib artifacts after" \
+  "$TEST_ROOT/error.log"
 test -s "$LAKE_CALL_LOG"
+find "$LAKE_CALL_LOG" -delete
+mv "$REPO/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean.missing" \
+  "$REPO/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean"
+
+PATH="$TEST_ROOT/bin:$PATH" "$REPO/scripts/seed_lake_build.sh" "$TARGET" >/dev/null
+test ! -e "$LAKE_CALL_LOG"
 test -f "$TARGET/.lake/build/example.olean"
 test -f "$TARGET/.lake/packages/mathlib/tracked"
 test -f "$TARGET/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean"
@@ -238,8 +253,10 @@ git -C "$REPO" \
   -c user.email=test@example.com \
   commit -qm "Advance source revision"
 PATH="$TEST_ROOT/bin:$PATH" \
-  "$REPO/scripts/seed_lake_build.sh" "$MISMATCH_TARGET" \
+  "$REPO/scripts/seed_lake_build.sh" "$MISMATCH_TARGET" --refresh \
   >"$TEST_ROOT/mismatch.log"
+test -s "$LAKE_CALL_LOG"
+find "$LAKE_CALL_LOG" -delete
 test -f "$MISMATCH_TARGET/.lake/packages/mathlib/tracked"
 test -f \
   "$MISMATCH_TARGET/.lake/packages/mathlib/.lake/build/lib/lean/Mathlib.olean"

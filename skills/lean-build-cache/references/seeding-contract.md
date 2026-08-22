@@ -1,7 +1,7 @@
 # Seeding Contract
 
-`seed_lake_build.sh TARGET [SOURCE] [--dry-run]` — SOURCE defaults to the
-repository's primary worktree.
+`seed_lake_build.sh TARGET [SOURCE] [--dry-run] [--refresh]` — SOURCE defaults
+to the repository's primary worktree.
 
 Preconditions (the script dies rather than degrade):
 - macOS with APFS; `/bin/cp -c` is used by absolute path so Homebrew GNU
@@ -14,9 +14,10 @@ Preconditions (the script dies rather than degrade):
   directories, not symlinks (nested Lake build dirs included).
 - Git dependency checkouts are clean and at the revisions recorded in the
   manifest.
-- Prebuilt `Mathlib.olean` present in the source — if missing, run
-  `lake exe cache get` in the source first. The seed also runs
-  `lake exe cache get` itself to verify artifacts match the manifest revision.
+- Prebuilt `Mathlib.olean` present in the source. If it is missing, the seed
+  runs `lake exe cache get` in the source itself; when the artifact is already
+  present the fetch is skipped, and `--refresh` forces it (e.g. to re-verify
+  artifacts against the manifest revision).
 - Target `.lake` absent.
 
 Behavior:
