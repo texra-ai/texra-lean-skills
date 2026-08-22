@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Lean Build Cache'
+  short_description: 'Fast local Lean builds: cache-first, hot main, APFS worktree seeding'
+  default_prompt: 'Use $lean-build-cache to set up or repair the Lake build cache for this worktree.'
