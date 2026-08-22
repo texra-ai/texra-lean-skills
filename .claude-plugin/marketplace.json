@@ -1,11 +1,13 @@
 {
   "name": "texra-lean-skills",
-  "owner": { "name": "texra-ai" },
+  "owner": {
+    "name": "texra-ai"
+  },
   "plugins": [
     {
       "name": "texra-lean-skills",
       "description": "Agent skills for Lean 4 / Mathlib formalization",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./"
     }
   ]
