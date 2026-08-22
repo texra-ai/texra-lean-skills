@@ -16,6 +16,19 @@ A note is a short standalone LaTeX article. Start from `assets/template.tex`, wh
 
 Cite sources by label or line range: `arXiv:1606.00608, eq:II_CF1`, `Wolf §6.2`, `CPSV16, Lemma Lem1`. Put issue links, PR links, declaration names, and file paths in footnotes.
 
+## Verdict marker
+
+Directly after `\maketitle`, every note declares
+`\gapnote{<kind>}{<status>}` — kind from the classification vocabulary
+(`clarification`, `local-correction`, `scope-restriction`, `unfaithful`,
+`false-source`, `open-gap`), status `open`/`resolved`/`historical`.
+Severity derives from the kind (unfaithful, false-source, open-gap are
+high; scope-restriction and local-correction medium; clarification low) —
+never stated separately. Resolving a gap changes the status, not the kind;
+the published index sorts open notes first, dims the settled ones, and
+reports the open/high-severity counts. CI can require the marker
+(`require_verdict = true` in the `[paper_gaps]` config).
+
 ## Naming
 
 `<key>_<topic>.tex`. Keys live in a registry (one dict or table per project) mapping key → source: `cpsv16 → arXiv:1606.00608`, `wolf → Wolf, Quantum Channels & Operations`. Reserve one key (e.g. `tnlean`) for internal theorem-surface audits. Enforce in CI: reject an unregistered key and any repository reference to a note file that does not exist. Never encode issue numbers, first names, or bare arXiv numbers as keys; never append `_v1` — the repository history is the version record.
