@@ -13,6 +13,7 @@ Agent skills for Lean 4 / Mathlib formalization. Distributed as a [Claude Code p
 | [`lean-proof-assistant`](skills/lean-proof-assistant/SKILL.md) | Develop and debug Lean 4 proofs in project context — inspect goals, search for lemmas, iterate on tactic scripts. |
 | [`lean-search`](skills/lean-search/SKILL.md) | Find existing Lean 4 / Mathlib lemmas, APIs, imports, and formalization patterns before writing new code. |
 | [`lean-simplifier`](skills/lean-simplifier/SKILL.md) | Refactor Lean 4 code toward Mathlib-quality style without changing theorem statements or computational meaning. |
+| [`find-simplification`](skills/find-simplification/SKILL.md) | Find and prove deletable surface area — dead declarations, pass-throughs, Mathlib shadows, mirrors, sequel scaffolding, degenerate-case apparatus — and record each candidate with build-checked evidence. |
 
 ## Install
 
@@ -25,7 +26,22 @@ Agent skills for Lean 4 / Mathlib formalization. Distributed as a [Claude Code p
 
 Update: `/plugin marketplace update texra-lean-skills`.
 
-### Codex, Cursor, and any other agent
+### Codex
+
+Run in your shell, not inside Codex:
+
+```bash
+codex plugin marketplace add texra-ai/texra-lean-skills
+codex plugin add texra-lean-skills@texra-lean-skills
+```
+
+In the Codex app: **Plugins → Add → Add marketplace**, enter
+`texra-ai/texra-lean-skills`, then switch on `texra-lean-skills`. Skills are
+invoked as `$find-simplification`, `$lean-search`, and so on.
+
+Update: `codex plugin marketplace upgrade texra-lean-skills`.
+
+### Cursor and any other agent
 
 Use the [skills CLI](https://github.com/vercel-labs/skills) — the ecosystem
 package manager for agent skills (70+ agents):
@@ -79,6 +95,7 @@ ln -s "$PWD/texra-lean-skills/skills/lean-proof-assistant" ~/.claude/skills/lean
 skills/<skill-name>/
 ├── SKILL.md           # frontmatter + workflow / quality bar
 ├── references/        # deeper checklists referenced from SKILL.md
+├── assets/            # scripts and templates to copy into a project
 └── agents/            # optional sub-agent definitions
 ```
 

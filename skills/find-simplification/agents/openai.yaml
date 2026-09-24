@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Find Simplification'
+  short_description: 'Find and prove deletable surface area in a Lean development'
+  default_prompt: 'Use $find-simplification to survey this directory for evidence-backed simplification candidates.'

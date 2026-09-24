@@ -14,5 +14,12 @@
     "formalization",
     "math",
     "skills"
-  ]
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "TeXRA Lean Skills",
+    "shortDescription": "Agent skills for Lean 4 / Mathlib formalization",
+    "longDescription": "Conventions, build-cache discipline, blueprint authoring, paper-gap notes, proof development, lemma search, style cleanup, and evidence-backed simplification surveys for Lean 4 / Mathlib projects.",
+    "category": "Coding"
+  }
 }
