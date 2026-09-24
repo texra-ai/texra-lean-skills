@@ -41,7 +41,7 @@ Three shapes are invisible to consumer counting, because counting starts from a 
 
 - **Name collisions.** The same fully qualified name declared in two modules of the import closure. Start from a *name* and count its definitions: [`assets/lean_name_collisions.py`](assets/lean_name_collisions.py) walks `namespace`/`end` and reports every name with more than one site.
 - **`private` re-declaration.** A `private` helper has no cross-module consumers by construction, and privacy is exactly what provokes a downstream file to re-declare it. Compare private bodies across files in the same directory.
-- **Unused imports.** One import line can drag a large compile cone into a module. For every import, name an identifier it supplies.
+- **Unused imports.** One import line can drag a large compile cone into a module. Use the official tools rather than a local script: `lake shake --explain` names the constants each import supplies (`--fix` applies the result), and importGraph's `#min_imports` and `#redundant_imports` work per module.
 
 Two dialect notes. The sequel chain is often not `Foo2.lean` but a **hypothesis-strength suffix ladder** — `foo`, `foo_c1`, `foo_c1_of_bar` — where each suffix weakens a hypothesis and the unsuffixed root is the abandoned strict version. And a systematic name-pair is a **mirror only when a transport map exists** that carries one side to the other; without one, the pair is content, and collapsing it deletes mathematics.
 
@@ -89,6 +89,10 @@ Reject or downgrade a candidate when:
 - The removal forces unrelated churn without reducing the public surface or the hypothesis lists.
 - The candidate is correct but tiny; batch it with related finds.
 - The "simplification" is a net-positive-line abstraction that names no future deletion it enables.
+
+## Keep it from coming back
+
+Two shapes can be stopped at the door once a cleanup lands. [`assets/check_numbered_lean_files.py`](assets/check_numbered_lean_files.py) rejects new numbered-sequel modules (`Foo2.lean`), with a debt list for existing ones that may only shrink, checked against the merge base, and explained exceptions for numbers that are mathematics (`ZMod2`, `Corollary41`). [`assets/check_oversized_lean_files.py`](assets/check_oversized_lean_files.py) rejects files over a line limit, exempting only validated import-only aggregators. Both are optional templates: copy `assets/` into the project's `scripts/`, write a `lean_file_policies.json` from [the example](assets/lean_file_policies.example.json) — source roots, exclusions, the limit, and the current debt — and run them in CI. The limit and the debt are the project's choices, not the skill's.
 
 ## Record the candidate
 
