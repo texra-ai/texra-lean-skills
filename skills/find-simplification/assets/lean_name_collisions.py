@@ -17,6 +17,10 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from lean_source import strip_lean_comments  # noqa: E402
+
 _KEYWORDS = (
     "theorem|lemma|def|abbrev|instance|structure|class abbrev|class inductive|class|inductive|"
     "opaque|axiom|noncomputable def|irreducible_def"
@@ -35,43 +39,16 @@ _MUTUAL = re.compile(r"^mutual\s*$")
 _END = re.compile(r"^end(?:\s+(\S+))?\s*$")
 
 
-def _blank_block_comments(text: str) -> str:
-    """Blank out block comments and docstrings, keeping line numbers.
-
-    Lean block comments nest, so a regex stops at the first inner ``-/``.
-    """
-    out = list(text)
-    depth, i = 0, 0
-    while i < len(text) - 1:
-        pair = text[i:i + 2]
-        if pair == "/-":
-            depth += 1
-        elif pair == "-/" and depth:
-            depth -= 1
-            out[i] = out[i + 1] = " "
-            i += 2
-            continue
-        elif pair == "--" and not depth:
-            i = text.find("\n", i)
-            if i < 0:
-                break
-            continue
-        if depth and out[i] != "\n":
-            out[i] = " "
-        i += 1
-    return "".join(out)
-
-
 def declarations(path: Path) -> list[tuple[str, int]]:
     text = path.read_text(encoding="utf-8", errors="replace")
-    text = _blank_block_comments(text)
+    text, _ = strip_lean_comments(text)
     # One entry per open scope, as Lean counts them: `namespace A.B` and
     # `section A.B` open one scope per component, and `end A.B` closes as
     # many. A namespace scope carries its component; other scopes carry None.
     scopes: list[str | None] = []
     found: list[tuple[str, int]] = []
     for lineno, raw in enumerate(text.splitlines(), start=1):
-        line = raw.split("--", 1)[0].strip()
+        line = raw.strip()
         if m := _NAMESPACE.match(line):
             scopes.extend(m.group(1).split("."))
         elif m := _SECTION.match(line):

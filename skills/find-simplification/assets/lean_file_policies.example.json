@@ -1,0 +1,17 @@
+{
+  "source_roots": ["MyProject"],
+  "excluded_roots": ["MyProject/Archive"],
+  "numbered_sequels": {
+    "debt": [
+      "MyProject/Chain/Recovery2.lean"
+    ],
+    "semantic_exceptions": {
+      "MyProject/Examples/ZMod2.lean": "ZMod 2 is the coefficient ring of the example."
+    }
+  },
+  "oversized": {
+    "max_lines": 1000,
+    "known": [],
+    "import_only_aggregators": ["MyProject.lean"]
+  }
+}
