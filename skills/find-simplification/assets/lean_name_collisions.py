@@ -18,44 +18,74 @@ import sys
 from pathlib import Path
 
 _KEYWORDS = (
-    "theorem|lemma|def|abbrev|instance|structure|class|inductive|"
+    "theorem|lemma|def|abbrev|instance|structure|class abbrev|class inductive|class|inductive|"
     "opaque|axiom|noncomputable def|irreducible_def"
 )
 _DECL = re.compile(
     r"^(?:@\[[^\]]*\]\s*)?"
-    r"(?P<mods>(?:(?:private|protected|noncomputable|partial|unsafe|nonrec)\s+)*)"
+    r"(?P<mods>(?:(?:private|protected|public|meta|noncomputable|partial|unsafe|nonrec)\s+)*)"
     rf"(?:{_KEYWORDS})\s+(?P<name>[^\s({{\[:]+)"
 )
 _NAMESPACE = re.compile(r"^namespace\s+(\S+)")
-_SECTION = re.compile(r"^(?:noncomputable\s+)?section(?:\s+(\S+))?\s*$")
+_SECTION = re.compile(
+    r"^(?:@\[[^\]]*\]\s*)?(?:(?:public|private|meta|noncomputable)\s+)*"
+    r"section(?:\s+(\S+))?\s*$"
+)
+_MUTUAL = re.compile(r"^mutual\s*$")
 _END = re.compile(r"^end(?:\s+(\S+))?\s*$")
-_COMMENT = re.compile(r"/-.*?-/", re.DOTALL)
+
+
+def _blank_block_comments(text: str) -> str:
+    """Blank out block comments and docstrings, keeping line numbers.
+
+    Lean block comments nest, so a regex stops at the first inner ``-/``.
+    """
+    out = list(text)
+    depth, i = 0, 0
+    while i < len(text) - 1:
+        pair = text[i:i + 2]
+        if pair == "/-":
+            depth += 1
+        elif pair == "-/" and depth:
+            depth -= 1
+            out[i] = out[i + 1] = " "
+            i += 2
+            continue
+        elif pair == "--" and not depth:
+            i = text.find("\n", i)
+            if i < 0:
+                break
+            continue
+        if depth and out[i] != "\n":
+            out[i] = " "
+        i += 1
+    return "".join(out)
 
 
 def declarations(path: Path) -> list[tuple[str, int]]:
     text = path.read_text(encoding="utf-8", errors="replace")
-    # Blank out block comments and docstrings, keeping line numbers.
-    text = _COMMENT.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
-    scopes: list[tuple[str, int]] = []  # (kind, number of namespace parts)
-    parts: list[str] = []
+    text = _blank_block_comments(text)
+    # One entry per open scope, as Lean counts them: `namespace A.B` and
+    # `section A.B` open one scope per component, and `end A.B` closes as
+    # many. A namespace scope carries its component; other scopes carry None.
+    scopes: list[str | None] = []
     found: list[tuple[str, int]] = []
     for lineno, raw in enumerate(text.splitlines(), start=1):
         line = raw.split("--", 1)[0].strip()
         if m := _NAMESPACE.match(line):
-            new = m.group(1).split(".")
-            parts.extend(new)
-            scopes.append(("namespace", len(new)))
-        elif _SECTION.match(line):
-            scopes.append(("section", 0))
-        elif _END.match(line) and scopes:
-            _, count = scopes.pop()
-            del parts[len(parts) - count:]
+            scopes.extend(m.group(1).split("."))
+        elif m := _SECTION.match(line):
+            scopes.extend([None] * (m.group(1).count(".") + 1 if m.group(1) else 1))
+        elif _MUTUAL.match(line):
+            scopes.append(None)
+        elif m := _END.match(line):
+            del scopes[len(scopes) - (m.group(1).count(".") + 1 if m.group(1) else 1):]
         elif (m := _DECL.match(line)) and "private" not in m.group("mods"):
             name = m.group("name")
             if name.startswith("_root_."):
                 full = name.removeprefix("_root_.")
             else:
-                full = ".".join([*parts, name])
+                full = ".".join([*filter(None, scopes), name])
             found.append((full, lineno))
     return found
 
@@ -66,7 +96,7 @@ def main() -> int:
     for root in roots:
         files = [root] if root.is_file() else sorted(root.rglob("*.lean"))
         for path in files:
-            if ".lake" in path.parts:
+            if ".lake" in path.relative_to(root).parts:
                 continue
             for name, lineno in declarations(path):
                 sites.setdefault(name, []).append(f"{path}:{lineno}")
