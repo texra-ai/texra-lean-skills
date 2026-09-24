@@ -14,7 +14,7 @@ Grep is the cheap filter, and in a Lean codebase it is wrong by default. Every r
 
 ## Blueprint exposure comes first
 
-In a blueprint-heavy chapter the normal shape of a *finished* theorem is "no Lean consumer, one `\lean{}` tag". Ranking by reference count before intersecting with the tag set wastes most of a survey. Build the tag set for the area first, intersect, then rank what remains.
+Skip this section when the project has no blueprint. In a blueprint-heavy chapter the normal shape of a *finished* theorem is "no Lean consumer, one `\lean{}` tag". Ranking by reference count before intersecting with the tag set wastes most of a survey. Build the tag set for the area first, intersect, then rank what remains.
 
 Tags wrap across lines with a LaTeX `%` continuation *inside* the braces:
 
@@ -25,7 +25,7 @@ Tags wrap across lines with a LaTeX `%` continuation *inside* the braces:
 
 A per-line grep and a naive `\lean\{([^}]*)\}` scan both miss these. Strip `%\s*\n\s*` before matching, then split each payload on commas — one tag may name several declarations — then cross-check by grepping the bare short name. [`../assets/lean_tag_census.py`](../assets/lean_tag_census.py) does both. Treating a payload as one set member undercounts the tagged set and can clear a still-exposed declaration for deletion.
 
-Measure density before choosing a lens. Above roughly two-thirds tag coverage the tag-visible shapes are exhausted; what remains is what a tag cannot name — `private` forwarders, structure-parent aliases, carrier restatements. If an area's zero-reference rate is under about 2%, that lens is spent; pivot.
+Measure density before choosing a lens. As a rule of thumb, above roughly two-thirds tag coverage the tag-visible shapes are exhausted; what remains is what a tag cannot name — `private` forwarders, structure-parent aliases, carrier restatements. If an area's zero-reference rate is under about 2%, that lens is spent; pivot.
 
 ## Then let the compiler answer
 

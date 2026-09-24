@@ -1,6 +1,6 @@
 ---
 name: find-simplification
-description: Find non-obvious, evidence-backed simplification candidates in a Lean 4 / Mathlib development and record them for a later deletion PR. Use when asked to audit a directory, review a PR, or run a proof-debt slice for zero-reference declarations, pass-through wrappers, Mathlib shadows, hand-mirrored files, numbered or suffix-ladder sequels, stricter-hypothesis specializations kept beside their general theorem, degenerate-case apparatus, parallel predicate families with bridge lemmas, and unused imports.
+description: Find non-obvious, evidence-backed simplification candidates in a Lean 4 / Mathlib development and record them for a later deletion PR. Use when asked to audit a directory, review a PR, or run a cleanup pass for zero-reference declarations, pass-through wrappers, Mathlib shadows, hand-mirrored files, numbered or suffix-ladder sequels, stricter-hypothesis specializations kept beside their general theorem, degenerate-case apparatus, parallel predicate families with bridge lemmas, and unused imports.
 ---
 
 # Find Simplification
@@ -34,8 +34,8 @@ A proof assistant makes these shapes unusually sharp: a declaration's consumers 
 - **Indirection** is the pass-through: `exact foo`, a field projection, a `simpa using` of one lemma, exported under a second name.
 - **Scaffolding** is the sequel chain (`Foo`, `Foo2`, `FooV2`, `FooCore` + `FooBridge`) whose intermediate lemmas each have one consumer in the next file.
 - **Hand-rolled code** is the Mathlib shadow: a local lemma that `exact?` closes from the library alone, or a local definition the library carries under another name. Toolchain bumps create new shadows silently.
-- **Degenerate cases** are `≠ 0` / `0 <` side conditions repeated on every downstream statement, a parallel `raw`/`active` predicate pair with bridge lemmas, and a counterexample module refuting a hyper-literal reading nobody intended.
-- **Hypotheses** are their own category. A hypothesis every caller discharges by the same lemma belongs inside the theorem; a hypothesis no caller can discharge marks its whole route as superseded; a hypothesis absent from the cited source is not a simplification target but a faithfulness defect (see [`paper-gap-notes`](../paper-gap-notes/SKILL.md)).
+- **Degenerate cases** are `≠ 0` / `0 <` side conditions repeated on every downstream statement, and a parallel `raw`/`active` predicate pair with bridge lemmas, where the definition could carry the exclusion once.
+- **Hypotheses** are their own category. A hypothesis every caller discharges by the same lemma belongs inside the theorem; a hypothesis no caller can discharge marks its whole route as superseded; when the project formalizes a cited source, a hypothesis absent from that source is not a simplification target but a faithfulness defect (see [`paper-gap-notes`](../paper-gap-notes/SKILL.md)).
 
 Three shapes are invisible to consumer counting, because counting starts from a declaration and asks who uses it:
 
@@ -51,10 +51,10 @@ Proof text is the one place where shorter is not automatically simpler. The proo
 
 Before surveying, read what the project already decided, so that finds are new and rejections are cheap:
 
-- The agent instructions (`CLAUDE.md`, `AGENTS.md`) and contributing or convention docs: faithfulness rules, the policy on deprecation aliases and pass-throughs, the policy on degenerate readings.
-- Any proof-debt ledger, dated audit notes, or cleanup records. A candidate that duplicates an open entry is an evidence update to that entry, not a find; re-proposing an item retained on purpose must beat the recorded reason. Counts in old notes are snapshots — the newest note for the area wins.
+- The agent instructions (`CLAUDE.md`, `AGENTS.md`) and contributing or convention docs: the deprecation policy and its window, whether pass-throughs may go without an alias, and any rules on faithfulness to cited sources or on degenerate cases.
+- Whatever record of past cleanup the project keeps — a debt ledger, dated audit notes, cleanup issues, or only the git log. A candidate that duplicates an open entry is an evidence update to that entry, not a find; re-proposing an item retained on purpose must beat the recorded reason. Counts in old notes are snapshots — the newest note for the area wins.
 - Open *and* closed issues labelled for cleanup or proof debt.
-- The settled surfaces: companion-library boundaries, generated import aggregators (their import lists are a build artifact, not a consumer count), promoted tactic and simp-set ledgers, archive directories excluded from the root import, blueprint-cited declarations, and CI policy scripts. Trimming an unused declaration *inside* one is fine; collapsing the seam is not. Proposing to make a file pass a CI policy is welcome; proposing to loosen the policy is not.
+- The settled surfaces, such as boundaries with upstream dependencies, generated import aggregators (their import lists are a build artifact, not a consumer count), project tactics and simp sets, archive directories excluded from the root import, blueprint-cited declarations, and CI policy scripts. Trimming an unused declaration *inside* one is fine; collapsing the seam is not. Proposing to make a file pass a CI policy is welcome; proposing to loosen the policy is not.
 
 ## Survey broadly
 
@@ -64,37 +64,37 @@ Thin candidates are not enough: a single non-terminal `simp`, a stray `set_optio
 
 ## Audit hypotheses and layer boundaries
 
-For every hypothesis on a candidate theorem, name where it is discharged downstream. For every structure field, name a consumer that projects it; fields read only by the structure's own constructor lemmas are staging. For every layer crossing, check the direction: a lemma about bare matrices living in a domain-specific layer is a candidate to replace by its Mathlib form, and relocating it to a local "algebra" layer only creates the next shadow — upstream it, or leave it and record why.
+For every hypothesis on a candidate theorem, name where it is discharged downstream. For every structure field, name a consumer that projects it; fields read only by the structure's own constructor lemmas are staging. For every layer crossing, check the direction: a lemma stated purely about library objects but living in a domain-specific file is a candidate to replace by its upstream form, and relocating it to a local general-purpose layer only creates the next shadow — upstream it, or leave it and record why.
 
 ## Local lemma versus Mathlib
 
-The default runs toward the upstream library. For each local lemma that smells standard, try, in order: `exact?` on the statement with the local proof deleted; `rg` of the conclusion's head symbol under `.lake/packages/mathlib/Mathlib/` and any companion library; the project's toolchain-bump replacement audits, if it keeps them.
+The default runs toward the upstream library. For each local lemma that smells standard, try, in order: `exact?` on the statement with the local proof deleted; `rg` of the conclusion's head symbol under `.lake/packages/*/` (Mathlib and any other dependency); the Mathlib changelog or the project's own notes from its last toolchain bump.
 
 Search by the shape of the statement, not by the name. The hardest shadows share no token with their upstream twin; what finds them is reading a bare lemma sitting in a domain file and grepping the conclusion's form. A local lemma that strictly generalizes the upstream one, or states it for a different carrier, stays — record why in its docstring. A genuinely new Mathlib-shaped lemma can be the right answer when it deletes several local variants; state which variants it retires.
 
 ## Prove or reject each candidate
 
-Classify consumers before writing. **Production**: the source tree outside archives, blueprint `\lean{...}` tags, Lean scripts, and the docstrings of surviving declarations. **Non-production**: archives, audit snapshots, notes, and non-docstring comments. **Ambiguous**: glossaries and paper-gap notes — migrate the reference rather than counting it as a blocker.
+Classify consumers before writing. **Production**: the source tree outside archives, blueprint `\lean{...}` tags if the project has a blueprint, Lean scripts and tests, and the docstrings of surviving declarations. **Non-production**: archives, dated snapshots, notes, and non-docstring comments. **Ambiguous**: documentation that names a declaration as public API — migrate the reference rather than counting it as a blocker.
 
 Grep proposes; elaboration decides. The rules for counting without fooling yourself — dot-notation call sites, upstream twins, non-ASCII identifiers, ripgrep alternation shadowing, controls, self-inventory, and the dead-subgraph fixpoint — are in [references/consumer-counting.md](references/consumer-counting.md). In a blueprint-heavy area, build the `\lean{}` tag set **before** ranking by reference count: [`assets/lean_tag_census.py`](assets/lean_tag_census.py) handles `%`-continued and comma-separated tags. The build-side verdict (which target to rebuild, attribute-carrying lemmas, linters) is in the same reference.
 
 Reject or downgrade a candidate when:
 
 - A production consumer exists and removing it would change what is proved — a feature decision, not a cleanup.
-- A paper-gap note, audit note, or ledger entry justifies the design and the new evidence does not beat that reason. Check the *module path* too, not only the declaration.
+- A recorded rationale (a design note, an audit record, a documented source deviation) justifies the design and the new evidence does not beat that reason. Check the *module path* too, not only the declaration.
 - The deletion was already made and rolled back. `git log -S'<name>' --all -- <path>` finds commits where the occurrence count changed; `--diff-filter=D` matches only whole-file deletions and misses exactly this.
 - The declaration sits in a counterexample or witness module whose docstring advertises it as the file's claim.
 - It is `@[deprecated]` inside the project's transition window.
-- It is a substantive public declaration rather than a pass-through. A green root build proves only that nothing *in this repository* consumes it; such a name enters dated deprecation unless project policy says otherwise.
+- It is a substantive public declaration rather than a pass-through. A green root build proves only that nothing *in this repository* consumes it; downstream projects may. Such a name enters dated deprecation unless project policy says otherwise.
 - The removal forces unrelated churn without reducing the public surface or the hypothesis lists.
 - The candidate is correct but tiny; batch it with related finds.
 - The "simplification" is a net-positive-line abstraction that names no future deletion it enables.
 
 ## Record the candidate
 
-Durable findings go to the project's existing record, in its own format — a proof-debt ledger entry, a cleanup issue, or a dated audit note for a finding that needs an argument (a retirement decision, a retained-on-purpose ruling, a mirror-collapse plan). Dedupe against open and closed issues; consolidate into the record that owns the topic.
+Durable findings go to the project's existing record, in its own format — a debt-ledger entry, a cleanup issue, or a dated note for a finding that needs an argument (a retirement decision, a retained-on-purpose ruling, a mirror-collapse plan). Dedupe against open and closed issues; consolidate into the record that owns the topic.
 
-Be concrete enough that an implementing PR can follow the trail: declarations by full name, the survivor each maps to, blueprint labels to redirect, grepped-then-built consumer counts, risk, and the net line estimate. One entry per durable candidate; do not pad the count.
+Be concrete enough that an implementing PR can follow the trail: declarations by full name, the survivor each maps to, blueprint labels to redirect (if any), grepped-then-built consumer counts, risk, and the net line estimate. One entry per durable candidate; do not pad the count.
 
 A PR implementing the simplification states its net line delta, the record it burns down, each removed declaration with its replacement, and any blueprint labels redirected. A PR that leaves old and new side by side is in progress, not done.
 
